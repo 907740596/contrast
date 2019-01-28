@@ -1,63 +1,47 @@
+
+
 import cv2
+import tkinter as tk
+
+from PIL import Image, ImageTk
 
 __author__ = 'ypf'
-__date__ = '2019/1/11,14:32'
+__date__ = '2019/1/17,14:24'
+window = tk.Tk()
+window.title('my window')
+window.geometry('300x300')
+imm='3.png'
+canvas=tk.Canvas(window,height=150,width=200)
+image_file=tk.PhotoImage(file=imm)
+image = canvas.create_image(10,10, anchor='nw', image=image_file)
+canvas.pack()
 
-
-import  numpy as np
-
-def duibi(image1,image2):
-    h1,w1,c1 = image1.shape
-    h2,w2,c2 = image2.shape
-    if c1 != c2:
-        print("channels NOT match, cannot merge")
-        return
-    else:
-        if w1 > w2:
-            tmp = np.zeros([h2,w1-w2,c1])
-            image3 = np.hstack([image2,tmp])
-            image3 = np.vstack([image1,image3])
-            cv2.imshow('666',image3)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-        elif w1 == w2:
-            image3 = np.vstack([image1,image2])
-            cv2.imshow('666',image3)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-        else:
-            tmp = np.zeros([h1,w2-w1,c2])
-            image3 = np.hstack([image1,tmp])
-            image3 = np.vstack([image3,image2])
-            cv2.imshow('666',image3)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-    return image3
-img1=cv2.imread('1.jpg')
-img2=cv2.imread('1.jpg')
-
-# duibi(img1,img2)
-image3=cv2.hconcat([img2,img1])  #  横向拼接
-image4=cv2.vconcat([img2,img1]) #  纵向拼接
-cv2.imshow('666',image3)
-cv2.imshow('66',image4)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-def heng(img1,img2,img3,imgtop):
-    # 横向拼接,再纵向拼接函数
-    imgh = cv2.hconcat([img1,img2,img3])
-    imgF = cv2.vconcat([imgtop,imgh ])
-    return imgF
 def zong(img1,img2):
     # 拼接两个图
     imgend = cv2.hconcat([img1,img2])
     return imgend
-
-
-
-''''''''''''''''''''''''
-# 原来版本
+img1=cv2.imread('1.jpg')
+img2=cv2.imread('1.jpg')
+ima=zong(img1,img2)
+# e = tk.Entry(window,show='1.jpg')
+# e.pack()
+IM=cv2.imwrite("1.png", ima, [int(cv2.IMWRITE_PNG_COMPRESSION), 0])
+# im = Image.open(IM)
+# im.save('1.gif')
+image1 = Image.open('1.png')
+photo = ImageTk.PhotoImage(image1)
+label = tk.Label(image=photo)
+# img = tk.PhotoImage(file='1.jpg')
+# label = tk.Label(window, text="hello", image=img)
+label.pack()
+# img_gif = tk.PhotoImage(file = '1.gif')
+# label_img = tk.Label(window, image = img_gif)
+#
+# label_img.pack()
+window.mainloop()
+'''
+1.21
+'''
 """
 SSIM参数
         一种衡量两幅图像相似度的新指标，其值越大越好，最大为1，经常用到图像处理中，
@@ -73,19 +57,24 @@ SSIM参数
         ，并将失真建模为亮度、对比度和结构三个不同因素的组合。用均值作为亮度的估计，标准差作为对比度的估计，
         协方差作为结构相似程度的度量。
 """
+import os
 
+import copy
 import tkinter as tk
-from random import random
+
 from tkinter import  messagebox
+
+from PIL import Image, ImageTk
 from skimage.measure import compare_ssim
 import cv2
 import  numpy as  np
 class CompareImage():
     # 图片ssim对比函数
-    def compare_image(self, path_image1, path_image2):
+    def compare_image(self, path_image1):
        try:
            imageA = cv2.imread(path_image1)
-           imageB = cv2.imread(path_image2)
+           imageB = SaltAndPepper(imageA)
+           detil_image(imageA,imageB)
            crop_size = (320, 480)
            rayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
            rayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY)
@@ -106,23 +95,29 @@ l = tk.Label(window, bg='yellow', width=20, text='Vision')
 l.pack()
 jd = tk.Label(window, bg='yellow', width=20, text='SSIM标准:')
 jd.pack()
-
-
+# 原有图片
+# image1 = Image.open('logo.png')
+# photo = ImageTk.PhotoImage(image1)
+# label = tk.Label(window,image=photo, width=600, height=300, compound=tk.BOTTOM)
+# label.pack(side='right')
+# canvas= tk.Canvas(window, width=500, height=500, bg ='white')
+l1=tk.Label(window)
+l1.pack(side='right')
 # welcome image
-canvas = tk.Canvas(window, height=443, width=800)
-image_file = tk.PhotoImage(file='logo.png')
-image = canvas.create_image(0,0, anchor='nw', image=image_file)
-canvas.pack(side='right')
+# canvas = tk.Canvas(window, height=443, width=800)
+# image_file = tk.PhotoImage(file='logo.png')
+# image = canvas.create_image(0,0, anchor='nw', image=image_file)
+# canvas.pack(side='bottom')
 
 # user information
-tk.Label(window, text='图片地址1:').place(x=50, y= 150)
+tk.Label(window, text='测试块:').place(x=90, y= 150)
 img1 = tk.StringVar()
-entry_img1 = tk.Entry(window, textvariable=img1)
+entry_img1 = tk.Entry(window, textvariable=img1,highlightcolor='blue')
 entry_img1.place(x=160, y=150)
-tk.Label(window, text='图片地址2: ').place(x=50, y= 190)
-img2 = tk.StringVar()
-entry_img2 = tk.Entry(window, textvariable=img2)
-entry_img2.place(x=160, y=190)
+# tk.Label(window, text='图片地址2: ').place(x=50, y= 190)
+# img2 = tk.StringVar()
+# entry_img2 = tk.Entry(window, textvariable=img2)
+# entry_img2.place(x=160, y=190)
 # 拉动条  ssim对比值
 def print_selection(v):
     jd.config(text='SSIM:' + v)
@@ -130,7 +125,7 @@ def print_selection(v):
 s=tk.Scale(window,label='SSIM:',from_=0,to=1,tickinterval=0.1,orient=tk.HORIZONTAL,
            length=300,showvalue=True,resolution=0.1,command=print_selection)
 s.set(value=0.9)
-s.pack()
+s.pack(side='top')
 
 def calcAndDrawHist(image, color):
     # 直方图
@@ -158,9 +153,9 @@ def zong(img1,img2):
     return imgend
 def detil_image(name,name1):
     # 图片对比  生成直方图
-    macrop_size = (600, 400)   #   大图片尺寸
-    crop_size = (200, 200)     #小图片尺寸
-    original_img = cv2.imread(name)
+    macrop_size = (300, 200)   #   大图片尺寸
+    crop_size = (100, 100)     #小图片尺寸
+    original_img = name
     img = cv2.resize(original_img, macrop_size, fx=0.6, fy=0.6, interpolation=cv2.INTER_CUBIC)
     b, g, r = cv2.split(img)
 
@@ -175,7 +170,7 @@ def detil_image(name,name1):
 
 
     #   第二个图片操作
-    original_img1 = cv2.imread(name1)
+    original_img1 = name1
     img1 = cv2.resize(original_img1, macrop_size, fx=0.6, fy=0.6, interpolation=cv2.INTER_CUBIC)
     b, g, r = cv2.split(img1)
     hist1ImgB = calcAndDrawHist(b, [255, 0, 0])
@@ -187,49 +182,63 @@ def detil_image(name,name1):
     imgS = heng(hist1ImgB, hist1ImgG, hist1ImgR, img1)
     # 合并两张图片
     imgend=zong(imgF,imgS)
-
-    cv2.imshow('contrast', imgend)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-
-
-
-
+    FW=cv2.imwrite("end.png", imgend, [int(cv2.IMWRITE_PNG_COMPRESSION), 0])
+    return FW
 #定义添加椒盐噪声的函数
-def SaltAndPepper(src,percetage):
-    SP_NoiseImg=src
-    SP_NoiseNum=int(percetage*src.shape[0]*src.shape[1])
-    for i in range(SP_NoiseNum):
-        randX=random.random_integers(0,src.shape[0]-1)
-        randY=random.random_integers(0,src.shape[1]-1)
-        if random.random_integers(0,1)==0:
-            SP_NoiseImg[randX,randY]=0
-        else:
-            SP_NoiseImg[randX,randY]=255
-    return SP_NoiseImg
+def SaltAndPepper(yuan):
+    coutn = 100000
+    img=copy.deepcopy(yuan)
+    for k in range(0, coutn):
+        # get the random point
+        xi = int(np.random.uniform(0, img.shape[1]))
+        xj = int(np.random.uniform(0, img.shape[0]))
+        # add noise
+        if img.ndim == 2:
+            img[xj, xi] = 255
+        elif img.ndim == 3:
+            img[xj, xi, 0] = 25
+            img[xj, xi, 1] = 20
+            img[xj, xi, 2] = 20
+    return img
 
 def contrast():
     # 获取图片地址
     img_1 = img1.get()
-    img_2 = img1.get()
-    # 获取选定ssim值
     ssim1=s.get()
     # 进行对比
-    jieguo=compare_image.compare_image(img_1, img_2)
-    if jieguo==0 and float(ssim1)==False:
+    jieguo=compare_image.compare_image(img_1)
+    jieguo=round(jieguo,2)
+    if jieguo==0 or float(ssim1)==False:
         tk.messagebox.showinfo(title='出错了', message='检查图片路径或者ssim值是否有误')
     else:
-        tk.messagebox.showinfo(title='对比结果', message=f'SSIM:{jieguo}')
+        image2 = Image.open('end.png')
+        photo2 = ImageTk.PhotoImage(image2)
+        l1.config(image=photo2)
+        l1.image = photo2
+        # tk.messagebox.showinfo(title='对比结果', message=f'SSIM:{jieguo}')
         if  jieguo>float(ssim1):
-            l.config(bg='green',text='ok')
+            l.config(bg='green',text=f'ok   {jieguo}')
         else:
-            l.config( bg='red',  text='wrong')
-    detil_image(img_1,img_2)
+            l.config( bg='red',  text=f'wrong  {jieguo}')
+
 # login and sign up button
-btn_login = tk.Button(window, text='对比', command=contrast)
-btn_login.place(x=200, y=230)
+btn_login = tk.Button(window, text='加噪测试', command=contrast)
+btn_login.place(x=350, y=145)
+# img1 = cv2.imread('end.png')
+# im1 = Image.fromarray(cv2.cvtColor(img1,cv2.COLOR_BGR2RGB))
+# img = ImageTk.PhotoImage(image = im1)
+# itext = canvas.create_image((250, 150), image=img)
+# canvas.pack()
+# window.update()
+# image1 = Image.open('end.png')
+# label['image'] = ImageTk.PhotoImage(file=image1)
+# label.update()
+# if os.path.exists('end.png'):
+#     image2 = Image.open('end.png')
+#     photo2= ImageTk.PhotoImage(image2)
+#     label = tk.Label(image=photo2, width=600, height=300, compound=tk.BOTTOM)
+#     window.update()
 
 if __name__ == '__main__':
     window.mainloop()
+
