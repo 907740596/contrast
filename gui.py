@@ -13,11 +13,14 @@ SSIM参数
         ，并将失真建模为亮度、对比度和结构三个不同因素的组合。用均值作为亮度的估计，标准差作为对比度的估计，
         协方差作为结构相似程度的度量。
 """
-import os
+
 
 import copy
+import random
 import tkinter as tk
 from tkinter import  messagebox
+
+
 from PIL import Image, ImageTk
 from skimage.measure import compare_ssim
 import cv2
@@ -27,7 +30,7 @@ class CompareImage():
     def compare_image(self, path_image1):
        try:
            imageA = cv2.imread(path_image1)
-           imageB = SaltAndPepper(imageA)
+           imageB = addnoise(imageA)
            detil_image(imageA,imageB)
            crop_size = (320, 480)
            rayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
@@ -48,20 +51,12 @@ window.geometry('1000x630')
 window.resizable(0,0)
 # label  标签
 l = tk.Label(window, bg='#F5F5DC', width=30, text='Vision',justify='left')
-l.place(x=0,y=0)
+l.place(x=100,y=0)
 jd = tk.Label(window, bg='#F5F5DC', width=30, text='SSIM标准:',justify='left')
-jd.place(x=500,y=0)
+jd.place(x=600,y=0)
 l1=tk.Label(window)
 l1.pack(side='bottom')
-# welcome image
-# canvas = tk.Canvas(window, height=443, width=800)
-# image_file = tk.PhotoImage(file='logo.png')
-# image = canvas.create_image(0,0, anchor='nw', image=image_file)
-# canvas.pack(side='bottom')
-tk.Label(window, text='测试块:').place(x=760, y= 0)
-img1 = tk.StringVar()
-entry_img1 = tk.Entry(window, textvariable=img1,bg='#E6E6FA')
-entry_img1.place(x=820, y=0)
+
 def print_selection(v):
     # 拉动条  ssim对比值
     jd.config(text='SSIM:' + v)
@@ -69,7 +64,7 @@ def print_selection(v):
 s=tk.Scale(window,from_=0,to=1,tickinterval=0.1,orient=tk.HORIZONTAL,
            length=300,showvalue=True,resolution=0.1,command=print_selection,bg='#E6E6FA',width=5)
 s.set(value=0.9)
-s.place(x=200,y=0)
+s.place(x=300,y=0)
 
 def calcAndDrawHist(image, color):
     # 直方图
@@ -125,9 +120,9 @@ def detil_image(name,name1):
     FW=cv2.imwrite("end.png", imgend, [int(cv2.IMWRITE_PNG_COMPRESSION), 0])
     return FW
 
-def SaltAndPepper(yuan):
+def addnoise(yuan):
     # 定义添加椒盐噪声的函数
-    coutn = 100000
+    coutn = random.randint(1,10000)
     img=copy.deepcopy(yuan)
     for k in range(0, coutn):
         # get the random point
@@ -142,10 +137,23 @@ def SaltAndPepper(yuan):
             img[xj, xi, 2] = 20
     return img
 
+
+def createcolor():
+    # 生成色块
+    black=cv2.imread(r"D:\shiju\contrast\black.jpg")
+    blue=cv2.imread(r"D:\shiju\contrast\blue.jpg")
+    orange=cv2.imread(r"D:\shiju\contrast\orange.jpg")
+    red=cv2.imread(r"D:\shiju\contrast\red.jpg")
+    listcolor=random.sample([black,blue,orange,red],4)
+    imagecolor = cv2.hconcat(listcolor)
+    cv2.imwrite('RandomColor.jpg', imagecolor)
+    return imagecolor
+
 def contrast():
     # 对比函数
     # 获取图片地址
-    img_1 = img1.get()
+    createcolor()
+    img_1 = "D:\shiju\contrast\RandomColor.jpg"
     ssim1=s.get()
     # 进行对比
     jieguo=compare_image.compare_image(img_1)
@@ -165,7 +173,7 @@ def contrast():
 
 # 测试按钮函数
 btn_login = tk.Button(window, text='加噪测试', command=contrast,bg='#D8BFD8')
-btn_login.place(x=700, y=0)
+btn_login.place(x=800, y=0)
 
 
 if __name__ == '__main__':
